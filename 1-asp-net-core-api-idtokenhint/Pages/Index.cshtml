@@ -5,12 +5,21 @@
 }
 
             <div style="text-align: center;">
-                <img src="VerifiedCredentialExpert-icon.png" height=200px; />
+                <img id="logo" src="VerifiedCredentialExpert-icon.png" height=200px; />
                 <h1>Verifiable Credential Expert Issuance and Verifier Sample</h1>
         
                 <button type="button" id="idIssue" class="button">Issue Credential</button>
                 <button type="button" id="idVerify" class="button">Verify Credential</button>
                 <script>
+                      fetch('api/issuer/get-manifest')
+        .then(function (response) {
+          response.text()
+            .catch(error => displayMessage(error))
+            .then(function (message) {
+              var manifest = JSON.parse(message);
+              document.getElementById('logo').src = manifest.display.card.logo.uri;
+            }).catch(error => { console.log(error.message); })
+        }).catch(error => { console.log(error.message); })
                         var idIssue = document.getElementById('idIssue');
                         var idVerify = document.getElementById('idVerify');
 

@@ -1,16 +1,16 @@
 ﻿@page
 @model AspNetCoreVerifiableCredentials.Pages.IssuerModel
 @{
-    ViewData["Title"] = "Issuer";
+  ViewData["Title"] = "Issuer";
 }
 <div id="wrap">
-    <div style="text-align: center;">
-        <img id="logo" src="VerifiedCredentialExpert-icon.png" height=200px; />
-        <h1 id="idTitle">Verifiable Credential Issuance</h1>
-        <h2 id="idSubTitle"></h2>
+  <div style="text-align: center;">
+    <img id="logo" src="" height=200px; />
+    <h1 id="idTitle">Verifiable Credential Issuance</h1>
+    <h2 id="idSubTitle"></h2>
 
-        <p id="photo-help" style="text-align:left; display:none">
-            @* This verifiable credential includes a photo claim that you can be used for biometric face check during presentation. You can either take a selfie or upload an existing picture of you before you issue the credential.
+    <p id="photo-help" style="text-align:left; display:none">
+      @* This verifiable credential includes a photo claim that you can be used for biometric face check during presentation. You can either take a selfie or upload an existing picture of you before you issue the credential.
             <br /><br />
             For selfie, click the Take Selfie button, then scan the QR code with the <strong>QR Code Reader app</strong> on your mobile, click 'Open Camera' in the page, take selfie and then click 'Use photo' in the mobile.
             The photo is not persisted anywhere and is just added to the credential you will have in your wallet.
@@ -18,129 +18,153 @@
             Then click Issue Credential to start the issuance process. When the QR code appears, scan it with your <strong>Microsoft Authenticator</strong> or your <strong>custom wallet</strong> app.
             <br /><br />
             The photo should be a portrait photo of atleast 200x200 pixels. Glasses, masks, hats, headphones, head coverings and face coverings will result in failure in liveness checks during presentations. *@
-        </p>
+    </p>
 
-        <div id="message-wrapper" class="margin-bottom-75" style="display: none">
-            <i class="fas fa-user-check green icon-text-large margin-bottom-25"></i>
-            <div id="message"></div>
-        </div>
+    <div id="message-wrapper" class="margin-bottom-75" style="display: none">
+      <i class="fas fa-user-check green icon-text-large margin-bottom-25"></i>
+      <div id="message"></div>
+    </div>
 
-        <!-- ADDED: DOB input (keeps existing look; no elements removed/unchanged) -->
-        <div id="dob-block" style="margin:16px 0;">
-            <label for="dob" style="display:inline-block; margin-bottom:6px;">Date of birth (required for
-                issuance)</label><br>
-            <input type="date" id="dob" aria-label="Date of birth" />
-            <small style="display:block; opacity:0.8; margin-top:4px;">
-                We only use this to compute “Age over 18” for the credential.
-            </small>
-        </div>
+    <!-- ADDED: DOB input (keeps existing look; no elements removed/unchanged) -->
+    <div id="dob-block" style="margin:16px 0;">
+      <label for="dob" style="display:inline-block; margin-bottom:6px;">Date of birth (required for
+        issuance)</label><br>
+      <input type="date" id="dob" aria-label="Date of birth" />
+      <small style="display:block; opacity:0.8; margin-top:4px;">
+        We only use this to compute “Age over 18” for the credential.
+      </small>
+    </div>
 
-        <button type="button" id="issue-credential" class="button bg-nw-purple text-nw-white">Issue Credential</button>
-        @* <button type="button" id="check-result" class="button bg-nw-purple text-nw-white" style="display:none">Check Result</button>
+    <button type="button" id="issue-credential" class="button bg-nw-purple text-nw-white">Issue Credential</button>
+    @* <button type="button" id="check-result" class="button bg-nw-purple text-nw-white" style="display:none">Check Result</button>
         <button type="button" id="take-selfie" class="button bg-nw-purple text-nw-white" style="display:none">Take Selfie</button> *@
 
-        <input type='file' id="imageUpload" accept="image/*" class="button bg-nw-blue text-nw-white" style="display:none" />
-        <br /><br />
-        <div id="qrcode" style="text-align:center; display:none"></div>
-        <br />
-        <div id="pinCode" style="display: none"></div>
-        <br />
-        <img id="selfie" width="240" height="320" style="display:none" />
+    <input type='file' id="imageUpload" accept="image/*" class="button bg-nw-blue text-nw-white" style="display:none" />
+    <br /><br />
+    <div id="qrcode" style="text-align:center; display:none"></div>
+    <br />
+    <div id="pinCode" style="display: none"></div>
+    <br />
+    <img id="selfie" width="240" height="320" style="display:none" />
 
-        <script src="qrcode.min.js"></script>
-        <script src="verifiedid.requestservice.client.js"></script>
-        <script src="verifiedid.uihandler.js"></script>
+    <script src="qrcode.min.js"></script>
+    <script src="verifiedid.requestservice.client.js"></script>
+    <script src="verifiedid.uihandler.js"></script>
 
-        <script>
-  // ADDED: helper to validate yyyy-mm-dd (from <input type="date">)
-  function getDobOrShowError() {
-    const el = document.getElementById('dob');
-    if (!el) return null;
-    const val = (el.value || '').trim();
-    if (!val) {
-      alert('Please select your date of birth before issuing.');
-      return null;
-    }
-    // <input type="date"> already enforces yyyy-mm-dd in modern browsers,
-    // but we’ll be defensive:
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(val)) {
-      alert('Date of birth must be in YYYY-MM-DD format.');
-      return null;
-    }
-    return val;
-  }
+    <script>
 
-  // ADDED: transparently append ?dob=... when the page (or your JS files) call the issuance API
-  (function attachDobToIssuanceFetch() {
-    const origFetch = window.fetch;
-    window.fetch = function(input, init) {
-      try {
-        let url = (typeof input === 'string') ? input : input?.url;
-        // only intercept the issuance endpoint; leave everything else untouched
-        if (url && url.indexOf('/api/issuer/issuance-request') !== -1) {
-          const dob = getDobOrShowError();
-          if (!dob) {
-            // block the call if DOB missing/invalid
-            return Promise.reject(new Error('DOB is required for issuance'));
-          }
-          const u = new URL(url, window.location.origin);
-          if (!u.searchParams.get('dob')) {
-            u.searchParams.set('dob', dob);
-          }
-          input = (typeof input === 'string') ? u.toString() : new Request(u.toString(), input);
-        }
-      } catch (e) {
-        // fall through to original fetch if anything unexpected happens
-        console.warn('DOB append shim warning:', e);
+      // ADDED: strict 18+ check
+      function isUserOver18(dobStr) {
+        if (!dobStr) return false;
+        const dob = new Date(dobStr);
+        if (isNaN(dob.getTime())) return false;
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+        return age >= 18;
       }
-      return origFetch.call(this, input, init);
-    };
-  })();
-            var qrcode = new QRCode("qrcode", { width: 150, height: 150 });
-            var havePhotoClaim = false;
 
-            fetch('api/issuer/get-manifest')
-                .then(function (response) {
-                    response.text()
-                        .catch(error => displayMessage(error))
-                        .then(function (message) {
-                            var manifest = JSON.parse(message);
-                            document.getElementById('idTitle').innerHTML = "Issuance of " + manifest.display.card.title + " by " + manifest.display.card.issuedBy;
-                            document.getElementById('idSubTitle').innerHTML = manifest.display.card.description;
-                            document.getElementById('logo').src = manifest.display.card.logo.uri;
-                            // if the manifest has a claim with type image/jp[e]g, then we should support adding a photo
-                            if (message.includes("image/jp")) {
-                                havePhotoClaim = true;
-                                hideShowPhotoElements("");
-                            }
-                        }).catch(error => { console.log(error.message); })
-                }).catch(error => { console.log(error.message); })
+      // ADDED: helper to validate yyyy-mm-dd (from <input type="date">)
+      function getDobOrShowError() {
+        const el = document.getElementById('dob');
+        if (!el) return null;
+        const val = (el.value || '').trim();
+        if (!val) {
+          alert('Please select your date of birth before issuing.');
+          return null;
+        }
+        // <input type="date"> already enforces yyyy-mm-dd in modern browsers,
+        // but we’ll be defensive:
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+          alert('Date of birth must be in YYYY-MM-DD format.');
+          return null;
+        }
+        return val;
+      }
 
-            document.getElementById('issue-credential').addEventListener('click', () => {
-                if ( havePhotoClaim ) {
-                    setUserPhoto();
-                    hideShowPhotoElements("none");
-                    // make sure the photo is sent to API in backend before we continue
-                    setTimeout(requestService.createIssuanceRequest(), 250);
-                } else {
-                    requestService.createIssuanceRequest();
-                }
-            });
+      // ADDED: transparently append ?dob=... when the page (or your JS files) call the issuance API
+      (function attachDobToIssuanceFetch() {
+        const origFetch = window.fetch;
+        window.fetch = function (input, init) {
+          try {
+            let url = (typeof input === 'string') ? input : input?.url;
+            // only intercept the issuance endpoint; leave everything else untouched
+            if (url && url.indexOf('/api/issuer/issuance-request') !== -1) {
+              const dob = getDobOrShowError();
+              if (!dob) {
+                // block the call if DOB missing/invalid
+                return Promise.reject(new Error('DOB is required for issuance'));
+              }
+              const u = new URL(url, window.location.origin);
+              if (!u.searchParams.get('dob')) {
+                u.searchParams.set('dob', dob);
+              }
+              input = (typeof input === 'string') ? u.toString() : new Request(u.toString(), input);
+            }
+          } catch (e) {
+            // fall through to original fetch if anything unexpected happens
+            console.warn('DOB append shim warning:', e);
+          }
+          return origFetch.call(this, input, init);
+        };
+      })();
+      var qrcode = new QRCode("qrcode", { width: 150, height: 150 });
+      var havePhotoClaim = false;
 
-            document.getElementById('take-selfie').addEventListener('click', () => {
-                document.getElementById("selfie").src = "";
-                document.getElementById("selfie").style.display = "none";
-                document.getElementById("imageUpload").style.display = "none";
-                requestService.createSelfieRequest();
-            });
+      fetch('api/issuer/get-manifest')
+        .then(function (response) {
+          response.text()
+            .catch(error => displayMessage(error))
+            .then(function (message) {
+              var manifest = JSON.parse(message);
+              document.getElementById('idTitle').innerHTML = "Issuance of " + manifest.display.card.title + " by " + manifest.display.card.issuedBy;
+              document.getElementById('idSubTitle').innerHTML = manifest.display.card.description;
+              document.getElementById('logo').src = manifest.display.card.logo.uri;
+              // if the manifest has a claim with type image/jp[e]g, then we should support adding a photo
+              if (message.includes("image/jp")) {
+                havePhotoClaim = true;
+                hideShowPhotoElements("");
+              }
+            }).catch(error => { console.log(error.message); })
+        }).catch(error => { console.log(error.message); })
 
-            document.getElementById('check-result').addEventListener('click', () => {
-                requestService.pollRequestStatus(requestService.request.id);
-            });
+      document.getElementById('issue-credential').addEventListener('click', () => {
+        const dobEl = document.getElementById('dob');
+        const dob = dobEl ? (dobEl.value || '').trim() : '';
+        if (!dob) {
+          alert('Please select your date of birth before issuing.');
+          return; // stop here
+        }
+        if (!isUserOver18(dob)) {
+          displayMessage("You must be 18 or older to receive this credential.");
+          hideDobBlock(); // optional: keep if you want it hidden after decision
+          return; // stop here (no API call, no QR)
+        }
+        if (havePhotoClaim) {
+          setUserPhoto();
+          hideShowPhotoElements("none");
+          // make sure the photo is sent to API in backend before we continue
+          setTimeout(requestService.createIssuanceRequest(), 250);
+        } else {
+          requestService.createIssuanceRequest();
+        }
+      });
 
-            document.getElementById('imageUpload').addEventListener('change', function (e) {
-                uploadImage(e)
-            });
-        </script>
-    </div>
+      document.getElementById('take-selfie').addEventListener('click', () => {
+        document.getElementById("selfie").src = "";
+        document.getElementById("selfie").style.display = "none";
+        document.getElementById("imageUpload").style.display = "none";
+        requestService.createSelfieRequest();
+      });
+
+      document.getElementById('check-result').addEventListener('click', () => {
+        requestService.pollRequestStatus(requestService.request.id);
+      });
+
+      document.getElementById('imageUpload').addEventListener('change', function (e) {
+        uploadImage(e)
+      });
+    </script>
+  </div>
 </div>
