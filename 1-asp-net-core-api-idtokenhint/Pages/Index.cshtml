@@ -3,13 +3,22 @@
 @{
     ViewData["Title"] = "Home";
 }
+<div class="content-card">
+    <div class="header-logo-title">
+        <img id="logo" src="HippoLogo.png" />
+        <h1>ID proof of concept</h1>
+    </div>
 
-            <div style="text-align: center;">
-                <img id="logo" src="HippoLogo.png" height=160px; width=160px; />
-                <h1>Verifiable Credential Expert Issuance and Verifier Sample</h1>
-        
-                <button type="button" id="idIssue" class="button">Issue Credential</button>
-                <button type="button" id="idVerify" class="button">Verify Credential</button>
+    <h2 class="main-action-title">Issue or verify an ID</h2>
+    
+    <p class="small-instruction">
+Issue and verify official ID documents instantly using decentralized, tamper-proof credentials. Your data stays private, secure, and under your control.
+    </p>
+
+    <div style="margin-top: 30px;">
+        <button type="button" id="idIssue" class="button">Issue an ID</button>
+        <button type="button" id="idVerify" class="button">Verify an ID</button>
+    </div>
                 <script>
                       fetch('api/issuer/get-manifest')
         .then(function (response) {

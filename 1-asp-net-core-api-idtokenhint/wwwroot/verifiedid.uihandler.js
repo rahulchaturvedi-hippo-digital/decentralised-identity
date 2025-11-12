@@ -9,6 +9,7 @@ function dimQRCode() {
 }
 function hideQRCode() {
     document.getElementById("qrcode").style.display = "none";
+    document.getElementById("auth-block").style.display = "none";
     document.getElementById("qrcode").getElementsByTagName("img")[0].style.display = "none";
     var pinCode = document.getElementById('pinCode');
     if ( null != pinCode ) {
@@ -24,8 +25,22 @@ function drawQRCode(requestType, id, url, pinCode) {
     if (requestType == "presentation") {
         document.getElementById('verify-credential').style.display = "none";
         displayMessage("Waiting for QR code to be scanned");
+        var authBlock = document.getElementById('auth-block');
+        if (authBlock) {
+            document.getElementById('before-qr-block').style.display = "none";
+            authBlock.style.display = "block";
+        }
     } else if (requestType == "issuance") {
+        var inputBlock = document.getElementById('input-block');
+        if (inputBlock) {
+            inputBlock.style.display = 'none';
+        }
         document.getElementById('issue-credential').style.display = "none";
+        var authBlock = document.getElementById('auth-block');
+        if (authBlock) {
+            authBlock.style.display = 'block'; 
+        }
+        document.getElementById('qrcode').style.display = "block";
         document.getElementById('take-selfie').style.display = "none";
         displayMessage("Waiting for QR code to be scanned");
         if ( pinCode != undefined ) {

@@ -1,24 +1,137 @@
+
+
 body {
     font-family: sans-serif;
-    background-color: #E0E0E0;
+    background-color: #E0E0E0; /* Light gray background */
+    margin: 0; /* Remove default margin */
+    padding: 0;
 }
+
+/* Center the main content card structure on the page */
 #wrap {
     margin: 0 auto;
-    width: 800px;
+    width: 100%; /* Use full width on small screens */
+    max-width: 1000px; /* Limit overall content width */
 }
+
+/* ========================================================= */
+/* HIPPO LAYOUT STYLES (Content Card, Header, Inputs) */
+/* ========================================================= */
+
+/* Styles for the white content card (Crucial for the design) */
+.content-card {
+    background-color: white;
+    padding: 40px;
+    margin: 50px auto; /* Center vertically and horizontally, space from top/bottom */
+    max-width: 450px; /* Set max width as seen in screenshots */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    box-sizing: border-box;
+}
+
+/* Styles for the logo and title header (e.g., "Hippo • ID proof of concept") */
+.header-logo-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header-logo-title img {
+    height: 40px; /* Smaller logo as seen in screenshots */
+    width: auto;
+    margin-right: 10px;
+}
+
+.header-logo-title h1 {
+    font-size: 20px;
+    font-weight: normal;
+    color: #444;
+    margin: 0;
+    padding: 0;
+}
+
+/* Styles for the main action text (e.g., "Issue or verify an ID") */
+.main-action-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 10px 0 20px 0;
+    color: #333;
+}
+
+/* Styles for input fields */
+input[type="text"], input[type="date"] {
+    width: 100%;
+    padding: 10px 15px;
+    margin-bottom: 20px; /* Space between inputs */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #555;
+}
+
+/* Small instructional text */
+.small-instruction {
+    font-size: 14px;
+    color: #777;
+    margin-top: -10px;
+    margin-bottom: 20px;
+}
+
+/* Back to Start Link */
+.back-link {
+    font-size: 14px;
+    color: #3B2E58; /* Dark purple for link */
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* QR Code and PIN text styling (for Issuer page) */
+#auth-block ol {
+    padding-left: 20px; 
+    font-size: 14px; 
+    margin-top: 0;
+}
+#auth-block h3 {
+    font-size: 16px; 
+    margin-bottom: 15px; 
+    font-weight: bold; 
+    color: #3B2E58; /* Dark purple accent */
+}
+
+
+/* ========================================================= */
+/* YOUR ORIGINAL UTILITY AND BUTTON STYLES */
+/* ========================================================= */
 
 .button {
     background-color: #3B2E58;
     border: none;
     color: white;
-    padding: 15px 32px;
+    padding: 15px 25px;
     text-align: center;
     text-decoration: none;
     border-radius: 8px;
     display: inline-block;
     font-size: 16px;
     font-weight: bold;
-  }
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.button:hover {
+    background-color: #5A4980; /* Slightly lighter on hover */
+}
 
 .dark-purple-fill {
   background-color: #3B2E58;
@@ -52,6 +165,7 @@ body {
   text-align: center;
 }
 
+/* Custom styling for the generated QR code image */
 #qrcode > img {
   margin: 0 auto;
   padding-top: 25px;
@@ -74,7 +188,7 @@ body {
 }
 
 .margin-bottom-75 {
-  margin-bottom: 50px;
+  margin-bottom: 50px; /* Note: Your original had 75px class map to 50px */
 }
 
 .margin-bottom-100 {
@@ -84,6 +198,7 @@ body {
 .green {
   color: #228B22;
 }
+
 /*
 #message {
   font-size: 1.5em;
@@ -93,17 +208,20 @@ body {
     font-size: 1.5em;
 }
 
-/*------*/
+/*------ TABLE STYLES (Unrelated to screenshots, but kept from original) ------*/
 
 table {
     font-family: Arial, Helvetica, sans-serif;
     border-collapse: collapse;
     width: 100%;
+    table-layout: fixed; 
+    word-wrap: break-word;
 }
 
 table td, table th {
     border: 1px solid #ddd;
     padding: 8px;
+    overflow-wrap: break-word;
 }
 
 table tr:nth-child(even) {
