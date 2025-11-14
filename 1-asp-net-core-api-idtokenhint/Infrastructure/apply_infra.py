@@ -3,7 +3,7 @@ import sys
 import shutil
 
 # Terraform directory
-TERRAFORM_DIR = "./Infrastructure/azure"  # adjust to your Terraform code folder
+TERRAFORM_DIR = "./azure"  # adjust to your Terraform code folder
 
 def check_terraform():
     """Check if Terraform binary is available"""
@@ -13,29 +13,11 @@ def check_terraform():
 
 def parse_cli_args(args):
     """
-    Parse arguments like ip=1.2.3.4 into a dict
+    Parse terrform variable arguments into a dict
     """
     tf_vars = {}
-    for arg in args:
-        if "=" in arg:
-            key, value = arg.split("=", 1)
-            tf_vars[key] = value
-    return tf_vars
-
-def parse_cli_args(args):
-    """
-    Parse CLI args like: plan ip=1.2.3.4 db_password=xxx
-    Returns:
-        command: terraform subcommand (plan/apply/destroy)
-        tf_vars: dict of key=value variables
-    """
-    if not args:
-        print("Usage: python apply_infra.py <command> [var=value ...]")
-        sys.exit(1)
-
     command = args[0]
-    tf_vars = {}
-    for arg in args[1:]:
+    for arg in args:
         if "=" in arg:
             key, value = arg.split("=", 1)
             tf_vars[key] = value
@@ -51,20 +33,32 @@ def run_terraform_command(command, tf_vars=None):
         cmd.append("-auto-approve")
 
     # Add -var flags
-    if tf_vars:
+    if tf_vars and not command == "deploy":
         for key, value in tf_vars.items():
             cmd.append(f'-var={key}="{value}"')
 
     print(f"\nRunning: {' '.join(cmd)}\n")
 
     try:
-        result = subprocess.run(
+        if command == "deploy":
+            # Special handling for 'deploy' command
+            init_cmd = ["terraform", f"-chdir={TERRAFORM_DIR}", "init"]
+            subprocess.run(init_cmd, text=True, check=True, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+            apply_cmd = ["terraform", f"-chdir={TERRAFORM_DIR}", "apply", "-auto-approve"]
+            if tf_vars:
+                for key, value in tf_vars.items():
+                    apply_cmd.append(f'-var={key}="{value}"')
+            subprocess.run(apply_cmd, text=True, check=True, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        else:
+            result = subprocess.run(
             cmd,
             text=True,
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
-        )
+            )
     except subprocess.CalledProcessError as e:
         print("Terraform command failed!")
         print("STDOUT:\n", e.stdout)
