@@ -36,13 +36,11 @@ def run_and_stream_command(cmd):
     for line in process.stdout:
         print(line, end='')
 
+    process.wait()
     process.stdout.close()
-    return_code = process.wait()
-    if return_code != 0:
-        raise subprocess.CalledProcessError(return_code, cmd)
     
-
-
+    return process
+    
 
 def run_terraform_command(command, tf_vars=None):
     """Run Terraform command with optional variables"""
@@ -63,14 +61,14 @@ def run_terraform_command(command, tf_vars=None):
         if command == "deploy":
             # Special handling for 'deploy' command
             init_cmd = ["terraform", f"-chdir={TERRAFORM_DIR}", "init"]
-            run_and_stream_command(init_cmd)
+            result = run_and_stream_command(init_cmd)
             apply_cmd = ["terraform", f"-chdir={TERRAFORM_DIR}", "apply", "-auto-approve"]
             if tf_vars:
                 for key, value in tf_vars.items():
                     apply_cmd.append(f'-var={key}="{value}"')
-            run_and_stream_command(apply_cmd)
+            result = run_and_stream_command(apply_cmd)
         else:
-            run_and_stream_command(cmd)
+            result = run_and_stream_command(cmd)
     except subprocess.CalledProcessError as e:
         print("Terraform command failed!")
         print("STDOUT:\n", e.stdout)
