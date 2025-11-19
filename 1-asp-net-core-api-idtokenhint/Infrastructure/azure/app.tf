@@ -17,6 +17,12 @@ resource "azurerm_linux_web_app" "did-app-service" {
       dotnet_version = "8.0"
     }
   }
+
+  app_settings = {
+    "APPINSIGHTS_INSTRUMENTATIONKEY"        = azurerm_application_insights.appi.instrumentation_key
+    "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.appi.connection_string
+    "APPLICATIONINSIGHTS_ENABLE_LOGGING"    = "true"
+  }
 }
 
 data "azurerm_key_vault" "did_key_vault" {
