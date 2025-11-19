@@ -290,3 +290,12 @@ table th {
     padding: 2px 8px;
     border-radius: 4px;
 }
+
+.value-false {
+    color: #C62828;
+    background-color: #FFEBEE;
+    font-weight: bold;
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+}

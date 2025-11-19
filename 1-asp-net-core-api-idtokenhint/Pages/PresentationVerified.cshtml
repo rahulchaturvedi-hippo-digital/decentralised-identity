@@ -5,209 +5,209 @@
 }
 
 <div class="content-card" style="max-width: 700px;">
-    
+
     <div class="header-logo-title">
         <img src="HippoLogo.png" />
     </div>
 
     <a href="./" class="back-link">
-        < Back to Start
-    </a>
+        < Back to Start </a>
 
-    <div class="verified-page">
+            <div class="verified-page">
 
-        <div style="display: flex; align-items: center; margin-bottom: 20px;">
-        
-            <div class="success-icon" style="margin-left: 0; margin-right: 15px; margin-bottom: 0;">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+
+                    <div class="success-icon" style="margin-left: 0; margin-right: 15px; margin-bottom: 0;">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+
+                    <h1 id="vcType" class="main-action-title" style="font-size: 28px; margin-top: 0; margin-bottom: 0;">
+                        ID successfully verified</h1>
+
+                </div>
+
+                <div id="message-wrapper" class="margin-bottom-25" style="display: none;">
+                    <div id="message"></div>
+                </div>
+
+                <table id="claims">
+                    <thead>
+                        <tr>
+                            <th>Personal details</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+
+                <table id="vcinfo">
+                    <thead>
+                        <tr>
+                            <th>ID details</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
             </div>
-    
-            <h1 id="vcType" class="main-action-title" style="font-size: 28px; margin-top: 0; margin-bottom: 0;">ID successfully verified</h1>
 
-        </div>
+            <script src="verifiedid.requestservice.client.js"></script>
+            <script src="verifiedid.uihandler.js"></script>
 
-        <div id="message-wrapper" class="margin-bottom-25" style="display: none;">
-            <div id="message"></div>
-        </div>
-
-        <table id="claims">
-            <thead>
-                <tr>
-                    <th>Personal details</th>
-                    <th>Value</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-
-        <table id="vcinfo">
-            <thead>
-                <tr>
-                    <th>ID details</th>
-                    <th>Value</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-
-    <script src="verifiedid.requestservice.client.js"></script>
-    <script src="verifiedid.uihandler.js"></script>
-
-    <script>
-        fetch('api/issuer/get-manifest')
-            .then(function (response) {
-                response.text()
-                    .catch(error => displayMessage(error))
-                    .then(function (message) {
-                        var manifest = JSON.parse(message);
-                        document.getElementById('logo').src = manifest.display.card.logo.uri;
+            <script>
+                fetch('api/issuer/get-manifest')
+                    .then(function (response) {
+                        response.text()
+                            .catch(error => displayMessage(error))
+                            .then(function (message) {
+                                var manifest = JSON.parse(message);
+                                document.getElementById('logo').src = manifest.display.card.logo.uri;
+                            }).catch(error => { console.log(error.message); })
                     }).catch(error => { console.log(error.message); })
-            }).catch(error => { console.log(error.message); })
 
 
-        function addTableRow(tbodyRef, key, value) {
-            const claimNameMap = { 
-                "ageOver18": "Age over 18?", 
-                "firstName": "First name", 
-                "lastName": "Last name",
-                "credentialState": "State",
-                "domainValidation": "Domain validation",
-                "expirationDate": "Expiration date",
-                "issuanceDate": "Issuance data",
-                "matchConfidenceScore": "FaceCheck Score"
-            };
+                function addTableRow(tbodyRef, key, value) {
+                    const claimNameMap = {
+                        "ageOver18": "Age over 18?",
+                        "firstName": "First name",
+                        "lastName": "Last name",
+                        "credentialState": "State",
+                        "domainValidation": "Domain validation",
+                        "expirationDate": "Expiration date",
+                        "issuanceDate": "Issuance data",
+                        "matchConfidenceScore": "FaceCheck Score"
+                    };
 
-            var row = tbodyRef.insertRow();
-            
-            // Cell 1: Key (Claim Name)
-            var cellKey = row.insertCell(0);
-            cellKey.innerHTML = claimNameMap[key] || key;
+                    var row = tbodyRef.insertRow();
 
-            // Cell 2: Value
-            var cellValue = row.insertCell(1);
-            if (value === true || value === "true") {
-                cellValue.innerHTML = `<span class="value-true">True</span>`;
-            } else if (value === false || value === "false") {
-                cellValue.innerHTML = "False";
-            } else {
-                cellValue.innerHTML = value;
-            }
-        }
+                    // Cell 1: Key (Claim Name)
+                    var cellKey = row.insertCell(0);
+                    cellKey.innerHTML = claimNameMap[key] || key;
 
-        function drawClaimsTable(claims) {
-            if (Object.keys(claims).length > 0) {
-                var personalBody = document.getElementById('claims').getElementsByTagName('tbody')[0];
-                var idBody = document.getElementById('vcinfo').getElementsByTagName('tbody')[0];
-                // Define which keys go in the "Personal" table
-                var personalKeys = ['firstName', 'lastName', 'ageOver18'];
-
-                for (const key of Object.keys(claims)) {
-                    if (key == "photo" || key == "picture") {
-                        // Handle photo if it exists
-                        var img = document.createElement('img');
-                        img.width = 100;
-                        img.src = "data:image/*;base64," + decodeURI(claims[key]).replaceAll("_", "/").replaceAll("-", "+");
-                        var row = idBody.insertRow();
-                        row.insertCell(0).innerHTML = "Photo";
-                        row.insertCell(1).appendChild(img);
-
-                    } else if (personalKeys.includes(key)) {
-                        // Add to Personal Details table
-                        addTableRow(personalBody, key, claims[key]);
+                    // Cell 2: Value
+                    var cellValue = row.insertCell(1);
+                    if (value === true || value === "true") {
+                        cellValue.innerHTML = `<span class="value-true">True</span>`;
+                    } else if (value === false || value === "false") {
+                        cellValue.innerHTML = `<span class="value-false">False</span>`;
                     } else {
-                        // Add to ID Details table (if you want other claims to appear here)
-                        // addTableRow(idBody, key, claims[key]); 
+                        cellValue.innerHTML = value;
                     }
                 }
-            }
-        }
 
-        function drawVcInfoTable(respMsg, payload) {
-            if (Object.keys(payload).length > 0) {
-                var idBody = document.getElementById('vcinfo').getElementsByTagName('tbody')[0];
-                
-                for (const key of Object.keys(payload)) {
-                    if (key !== "claims") { 
-                        var value = payload[key];
-                        if (typeof value === 'object') {
-                            value = JSON.stringify(value);
+                function drawClaimsTable(claims) {
+                    if (Object.keys(claims).length > 0) {
+                        var personalBody = document.getElementById('claims').getElementsByTagName('tbody')[0];
+                        var idBody = document.getElementById('vcinfo').getElementsByTagName('tbody')[0];
+                        // Define which keys go in the "Personal" table
+                        var personalKeys = ['firstName', 'lastName', 'ageOver18'];
+
+                        for (const key of Object.keys(claims)) {
+                            if (key == "photo" || key == "picture") {
+                                // Handle photo if it exists
+                                var img = document.createElement('img');
+                                img.width = 100;
+                                img.src = "data:image/*;base64," + decodeURI(claims[key]).replaceAll("_", "/").replaceAll("-", "+");
+                                var row = idBody.insertRow();
+                                row.insertCell(0).innerHTML = "Photo";
+                                row.insertCell(1).appendChild(img);
+
+                            } else if (personalKeys.includes(key)) {
+                                // Add to Personal Details table
+                                addTableRow(personalBody, key, claims[key]);
+                            } else {
+                                // Add to ID Details table (if you want other claims to appear here)
+                                // addTableRow(idBody, key, claims[key]); 
+                            }
                         }
-                        addTableRow(idBody, key, value);
                     }
                 }
-                
-                // Add top-level details from the response
-                if (respMsg.jti) {
-                    addTableRow(idBody, "jti", respMsg.jti);
-                }
-                if (respMsg.subject) {
-                     var vcSubject = respMsg.subject.split(":");
-                     // Shorten the subject for display
-                     addTableRow(idBody, "subject", vcSubject[0] + ":" + vcSubject[1] + vcSubject[2] + "...");
-                }
-                if (respMsg.revocationStatus) {
-                    addTableRow(idBody, "revocationStatus", respMsg.revocationStatus);
-                }
-                if (respMsg.domainValidation) {
-                    addTableRow(idBody, "domainValidation", respMsg.domainValidation);
-                }
-                if (respMsg.matchConfidenceScore) {
-                    addTableRow(idBody, "matchConfidenceScore", respMsg.matchConfidenceScore);
-                }
-            }
-        }
 
-        function getPresentationResult(requestId) {
-            fetch(`${requestService.apiPollPresentationRequest}?id=${requestId}`)
-                .then(response => response.text())
-                .catch(error => {
-                    document.getElementById("message").innerHTML = error;
-                    document.getElementById("message-wrapper").style.display = "block";
-                })
-                .then(response => {
-                    if (response.length > 0) {
-                        console.log(response)
-                        respMsg = JSON.parse(response);
-                        if (respMsg.status == 'presentation_verified') {
-                            // Title is now static in the HTML
-                            // document.getElementById('vcType').innerText = "ID successfully verified";
-                            
-                            // Call the new table drawing functions
-                            drawClaimsTable(respMsg.payload[0].claims);
-                            drawVcInfoTable(respMsg, respMsg.payload[0]);
-                        } else {
-                            document.getElementById('vcType').innerText = "Verification Failed";
-                            document.getElementById("message").innerHTML = `Error: ${respMsg.message}`;
+                function drawVcInfoTable(respMsg, payload) {
+                    if (Object.keys(payload).length > 0) {
+                        var idBody = document.getElementById('vcinfo').getElementsByTagName('tbody')[0];
+
+                        for (const key of Object.keys(payload)) {
+                            if (key !== "claims") {
+                                var value = payload[key];
+                                if (typeof value === 'object') {
+                                    value = JSON.stringify(value);
+                                }
+                                addTableRow(idBody, key, value);
+                            }
+                        }
+
+                        // Add top-level details from the response
+                        if (respMsg.jti) {
+                            addTableRow(idBody, "jti", respMsg.jti);
+                        }
+                        if (respMsg.subject) {
+                            var vcSubject = respMsg.subject.split(":");
+                            // Shorten the subject for display
+                            addTableRow(idBody, "subject", vcSubject[0] + ":" + vcSubject[1] + vcSubject[2] + "...");
+                        }
+                        if (respMsg.revocationStatus) {
+                            addTableRow(idBody, "revocationStatus", respMsg.revocationStatus);
+                        }
+                        if (respMsg.domainValidation) {
+                            addTableRow(idBody, "domainValidation", respMsg.domainValidation);
+                        }
+                        if (respMsg.matchConfidenceScore) {
+                            addTableRow(idBody, "matchConfidenceScore", respMsg.matchConfidenceScore);
+                        }
+                    }
+                }
+
+                function getPresentationResult(requestId) {
+                    fetch(`${requestService.apiPollPresentationRequest}?id=${requestId}`)
+                        .then(response => response.text())
+                        .catch(error => {
+                            document.getElementById("message").innerHTML = error;
                             document.getElementById("message-wrapper").style.display = "block";
-                        }
-                    }
-                })
-        }
+                        })
+                        .then(response => {
+                            if (response.length > 0) {
+                                console.log(response)
+                                respMsg = JSON.parse(response);
+                                if (respMsg.status == 'presentation_verified') {
+                                    // Title is now static in the HTML
+                                    // document.getElementById('vcType').innerText = "ID successfully verified";
 
-
-        function parseParms(str) {
-            var pieces = str.split("&"), data = {}, i, parts;
-            for (i = 0; i < pieces.length; i++) {
-                parts = pieces[i].split("=");
-                if (parts.length < 2) {
-                    parts.push("");
+                                    // Call the new table drawing functions
+                                    drawClaimsTable(respMsg.payload[0].claims);
+                                    drawVcInfoTable(respMsg, respMsg.payload[0]);
+                                } else {
+                                    document.getElementById('vcType').innerText = "Verification Failed";
+                                    document.getElementById("message").innerHTML = `Error: ${respMsg.message}`;
+                                    document.getElementById("message-wrapper").style.display = "block";
+                                }
+                            }
+                        })
                 }
-                data[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
-            }
-            return data;
-        }
 
-        window.onload = function () {
-            var requestId = parseParms(document.location.search.substring(1)).id;
-            if (requestId) {
-                getPresentationResult(requestId)
-            }
-        }
-    </script>
+
+                function parseParms(str) {
+                    var pieces = str.split("&"), data = {}, i, parts;
+                    for (i = 0; i < pieces.length; i++) {
+                        parts = pieces[i].split("=");
+                        if (parts.length < 2) {
+                            parts.push("");
+                        }
+                        data[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
+                    }
+                    return data;
+                }
+
+                window.onload = function () {
+                    var requestId = parseParms(document.location.search.substring(1)).id;
+                    if (requestId) {
+                        getPresentationResult(requestId)
+                    }
+                }
+            </script>
 </div>
 <div id="payload" style="text-align:left; display:none; margin:25px"></div>
