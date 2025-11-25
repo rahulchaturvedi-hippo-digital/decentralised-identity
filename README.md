@@ -43,3 +43,29 @@ From the terminal, run this single command from anywhere to start the applicatio
 
 ```bash
 cd /decentralised-identity-1/1-asp-net-core-api-idtokenhint && chmod +x run-me.sh && ./run-me.sh
+```
+
+## Deploying Service to Azure
+
+To deploy the service to Azure follow these instructions.
+
+1. Navigate to the ```/Infrastrucutre``` directory
+
+```bash
+cd ./1-asp-net-core-api-idtokenhint/Infrastructure
+```
+
+2. Run this command to login to Azure. (Note: Create ```.env``` file with ```ARM_TENANT_ID="<tenant-id>"``` before running this command
+)
+
+```bash
+chmod 770 ./login.sh && ./login.sh
+```
+
+3. Then run the following command to deploy the VC service to Azure.
+
+```bash
+python3 apply_infra.py deploy
+```
+
+
