@@ -62,7 +62,7 @@ cd ./1-asp-net-core-api-idtokenhint/Infrastructure
 chmod 770 ./login.sh && ./login.sh
 ```
 
-3. The run the following command to deploy the VC service to Azure.
+3. Then run the following command to deploy the VC service to Azure.
 
 ```bash
 python3 apply_infra.py deploy
